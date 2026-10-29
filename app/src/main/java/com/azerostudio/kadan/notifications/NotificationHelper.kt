@@ -1,42 +1,59 @@
-package com.azerostudio.disela.notifications
+package com.azerostudio.kadan.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.azerostudio.disela.MainActivity
+import androidx.core.content.ContextCompat
+import com.azerostudio.kadan.MainActivity
 
 /*
- * All Disela notifications go through here, on one channel.
+ * All Kadan notifications go through here, on one channel.
  * One channel (not one per feature) keeps the settings surface simple for
- * a personal app: the user either wants Disela reminders or does not.
+ * a personal app: the user either wants Kadan reminders or does not.
  * Importance HIGH is deliberate: a due reminder that arrives silently in
  * the notification shade has already failed at its one job.
  *
- * Small icon: the platform info icon is used in v1 because Disela has no
- * launcher icon asset yet. Replace setSmallIcon with the Disela icon the
+ * Small icon: the platform info icon is used in v1 because Kadan has no
+ * launcher icon asset yet. Replace setSmallIcon with the Kadan icon the
  * moment an icon asset exists — a notification without a recognisable icon
  * is easy to dismiss by accident.
  */
 object NotificationHelper {
-    const val CHANNEL_ID = "disela_reminders"
-    const val EXTRA_OPEN_CAPTURE = "disela_open_capture"
+    const val CHANNEL_ID = "kadan_reminders"
+    const val EXTRA_OPEN_CAPTURE = "kadan_open_capture"
 
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Pengingat Disela",
+            "Pengingat Kadan",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Pengingat tugas dan nudge capture PR Disela."
+            description = "Pengingat tugas dan nudge capture PR Kadan."
         }
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
 
+    private fun hasNotificationPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
     fun showDueReminder(context: Context, taskId: Long, title: String, categoryLabel: String) {
+        if (!hasNotificationPermission(context)) return
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -54,15 +71,21 @@ object NotificationHelper {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-        NotificationManagerCompat.from(context).notify(taskId.toInt(), notification)
+        try {
+            NotificationManagerCompat.from(context).notify(taskId.toInt(), notification)
+        } catch (_: SecurityException) {
+            // Permission revoked concurrently.
+        }
     }
 
     fun showPrNudge(context: Context) {
+        if (!hasNotificationPermission(context)) return
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(EXTRA_OPEN_CAPTURE, true)
             // Pre-select the PR category in the capture sheet.
-            putExtra("disela_capture_category", "PR")
+            putExtra("kadan_capture_category", "PR")
         }
         val pendingIntent = android.app.PendingIntent.getActivity(
             context,
@@ -78,9 +101,13 @@ object NotificationHelper {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-        NotificationManagerCompat.from(context).notify(
-            ReminderScheduler.PR_NUDGE_REQUEST_CODE,
-            notification
-        )
+        try {
+            NotificationManagerCompat.from(context).notify(
+                ReminderScheduler.PR_NUDGE_REQUEST_CODE,
+                notification
+            )
+        } catch (_: SecurityException) {
+            // Permission revoked concurrently.
+        }
     }
 }

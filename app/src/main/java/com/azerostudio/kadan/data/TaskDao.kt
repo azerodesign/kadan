@@ -1,4 +1,4 @@
-package com.azerostudio.disela.data
+package com.azerostudio.kadan.data
 
 import androidx.room.Dao
 import androidx.room.Delete

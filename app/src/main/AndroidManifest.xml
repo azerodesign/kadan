@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-      Disela v1 permissions — each one is needed for a real feature, not a stub:
+      Kadan v1 permissions — each one is needed for a real feature, not a stub:
       POST_NOTIFICATIONS: show due reminders and the 15:15 PR nudge (runtime
         permission, requested in MainActivity on Android 13+).
       SCHEDULE_EXACT_ALARM: fire a reminder at its exact due time. On
@@ -19,13 +19,13 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".DiselaApplication"
+        android:name=".KadanApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Disela">
+        android:theme="@style/Theme.Kadan">
         <activity
             android:name=".MainActivity"
             android:exported="true"

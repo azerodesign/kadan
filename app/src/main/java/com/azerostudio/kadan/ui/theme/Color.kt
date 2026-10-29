@@ -1,20 +1,20 @@
-package com.azerostudio.disela.ui.theme
+package com.azerostudio.kadan.ui.theme
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 /*
- * THE ONLY file in Disela where literal colours may appear.
+ * THE ONLY file in Kadan where literal colours may appear.
  *
- * Rule (Material 3, see the Disela Material guide): screens must never use
+ * Rule (Material 3, see the Kadan Material guide): screens must never use
  * a hex value or Color.White/Black directly. They read roles only, e.g.
  * MaterialTheme.colorScheme.primary, .surfaceContainerLow,
  * .onSurfaceVariant, .errorContainer. That is what makes dark theme,
  * dynamic colour and high contrast work without touching every screen.
  *
  * These two schemes are the Material 3 baseline tonal schemes. When a brand
- * seed colour is chosen for Disela, replace this file with the export from
+ * seed colour is chosen for Kadan, replace this file with the export from
  * Google's Material Theme Builder (it emits exactly these two schemes) —
  * no screen code changes are needed, because screens only use roles.
  */

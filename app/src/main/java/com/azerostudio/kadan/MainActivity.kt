@@ -1,4 +1,4 @@
-package com.azerostudio.disela
+package com.azerostudio.kadan
 
 import android.Manifest
 import android.content.Intent
@@ -15,16 +15,16 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.azerostudio.disela.data.DiselaDatabase
-import com.azerostudio.disela.data.TaskRepository
-import com.azerostudio.disela.notifications.NotificationHelper
-import com.azerostudio.disela.notifications.ReminderScheduler
-import com.azerostudio.disela.ui.DiselaViewModel
-import com.azerostudio.disela.ui.HomeScreen
-import com.azerostudio.disela.ui.theme.DiselaTheme
+import com.azerostudio.kadan.data.KadanDatabase
+import com.azerostudio.kadan.data.TaskRepository
+import com.azerostudio.kadan.notifications.NotificationHelper
+import com.azerostudio.kadan.notifications.ReminderScheduler
+import com.azerostudio.kadan.ui.HomeScreen
+import com.azerostudio.kadan.ui.KadanViewModel
+import com.azerostudio.kadan.ui.theme.KadanTheme
 
 /*
- * MainActivity — the single activity of Disela v1.
+ * MainActivity — the single activity of Kadan v1.
  *
  * Permissions, in order, and why each is requested where it is:
  *  1. POST_NOTIFICATIONS (Android 13+): requested once, on first launch,
@@ -51,12 +51,12 @@ class MainActivity : ComponentActivity() {
            be shown, and the user can re-enable them in system settings.
            The app must not loop-request the permission. */ }
 
-    private val viewModel: DiselaViewModel by viewModels {
+    private val viewModel: KadanViewModel by viewModels {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val repository = TaskRepository(DiselaDatabase.get(applicationContext).taskDao())
-                return DiselaViewModel(
+                val repository = TaskRepository(KadanDatabase.get(applicationContext).taskDao())
+                return KadanViewModel(
                     repository = repository,
                     onTaskSaved = { task ->
                         ReminderScheduler.scheduleDue(applicationContext, task)
@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         handleCaptureIntent(intent)
 
         setContent {
-            DiselaTheme {
+            KadanTheme {
                 HomeScreen(
                     viewModel = viewModel,
                     onOpenExactAlarmSettings = {
@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleCaptureIntent(intent: Intent?) {
         if (intent?.getBooleanExtra(NotificationHelper.EXTRA_OPEN_CAPTURE, false) == true) {
-            val category = intent.getStringExtra("disela_capture_category") ?: "PR"
+            val category = intent.getStringExtra("kadan_capture_category") ?: "PR"
             viewModel.openCapture(category)
         }
     }

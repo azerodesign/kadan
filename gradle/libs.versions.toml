@@ -1,4 +1,4 @@
-# Version catalog for Disela v1.
+# Version catalog for Kadan v1.
 # IMPORTANT: these versions were chosen as known-stable releases at authoring
 # time (Oct 2026). Before the first cloud build, confirm them on the official
 # releases pages — AGP, Kotlin, Compose BOM, Room — and bump the catalog if

@@ -1,4 +1,4 @@
-package com.azerostudio.disela.ui
+package com.azerostudio.kadan.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -37,8 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.azerostudio.disela.data.Category
-import com.azerostudio.disela.data.Task
+import com.azerostudio.kadan.data.Category
+import com.azerostudio.kadan.data.Task
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -46,7 +46,7 @@ import java.util.Locale
 /*
  * Home screen — "Hari Ini".
  *
- * Material 3 rules applied here (see the Disela Material guide):
+ * Material 3 rules applied here (see the Kadan Material guide):
  *  - Scaffold slots only: TopAppBar, floatingActionButton, snackbarHost.
  *    The LazyColumn applies Scaffold's PaddingValues, so content never
  *    hides under the FAB or the navigation bar.
@@ -64,7 +64,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: DiselaViewModel,
+    viewModel: KadanViewModel,
     onOpenExactAlarmSettings: () -> Unit,
     exactAlarmGranted: Boolean
 ) {
@@ -75,10 +75,10 @@ fun HomeScreen(
     val pendingDeleted by viewModel.pendingDeleted.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val today = LocalDate.now(DiselaViewModel.ZONE)
+    val today = LocalDate.now(KadanViewModel.ZONE)
     val todayEpoch = today.toEpochDay()
-    val nowMinutes = java.time.LocalTime.now(DiselaViewModel.ZONE).hour * 60 +
-        java.time.LocalTime.now(DiselaViewModel.ZONE).minute
+    val nowMinutes = java.time.LocalTime.now(KadanViewModel.ZONE).hour * 60 +
+        java.time.LocalTime.now(KadanViewModel.ZONE).minute
 
     fun isOverdue(task: Task): Boolean {
         if (task.isDone) return false

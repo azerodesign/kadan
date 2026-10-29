@@ -1,4 +1,4 @@
-package com.azerostudio.disela.ui
+package com.azerostudio.kadan.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.azerostudio.disela.data.Category
-import com.azerostudio.disela.data.Task
+import com.azerostudio.kadan.data.Category
+import com.azerostudio.kadan.data.Task
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -76,7 +76,7 @@ fun CaptureSheet(
     ) -> Unit,
     onDelete: () -> Unit
 ) {
-    val zone = DiselaViewModel.ZONE
+    val zone = KadanViewModel.ZONE
     var title by remember { mutableStateOf(editingTask?.title ?: "") }
     var notes by remember { mutableStateOf(editingTask?.notes ?: "") }
     var categoryLabel by remember { mutableStateOf(initialCategoryLabel) }

@@ -1,4 +1,4 @@
-// Top-level build file for Disela.
+// Top-level build file for Kadan.
 // Versions live in gradle/libs.versions.toml. Check the official releases pages
 // (Android Gradle Plugin, Kotlin, Compose BOM, Room) at build time and bump
 // the catalog if a version is no longer available — do not copy a version

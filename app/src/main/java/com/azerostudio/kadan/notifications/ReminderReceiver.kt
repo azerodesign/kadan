@@ -1,9 +1,9 @@
-package com.azerostudio.disela.notifications
+package com.azerostudio.kadan.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.azerostudio.disela.data.DiselaDatabase
+import com.azerostudio.kadan.data.KadanDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val task = DiselaDatabase.get(context).taskDao().getById(taskId)
+                val task = KadanDatabase.get(context).taskDao().getById(taskId)
                 if (task != null && !task.isDone) {
                     NotificationHelper.showDueReminder(context, taskId, title, category)
                 }

@@ -1,4 +1,4 @@
-package com.azerostudio.disela.notifications
+package com.azerostudio.kadan.notifications
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import com.azerostudio.disela.data.Task
+import com.azerostudio.kadan.data.Task
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,7 +15,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /*
- * How Disela reminders are scheduled — read this before touching it.
+ * How Kadan reminders are scheduled — read this before touching it.
  *
  * Mechanism: AlarmManager, NOT WorkManager, for due reminders. WorkManager
  * is for deferrable work; a reminder that must fire at a set time is
@@ -53,8 +53,8 @@ import java.time.ZonedDateTime
  */
 object ReminderScheduler {
     const val PR_NUDGE_REQUEST_CODE = 900001
-    private const val ACTION_DUE = "com.azerostudio.disela.ACTION_DUE"
-    private const val ACTION_PR_NUDGE = "com.azerostudio.disela.ACTION_PR_NUDGE"
+    private const val ACTION_DUE = "com.azerostudio.kadan.ACTION_DUE"
+    private const val ACTION_PR_NUDGE = "com.azerostudio.kadan.ACTION_PR_NUDGE"
     private const val EXTRA_TASK_ID = "task_id"
     private const val EXTRA_TITLE = "title"
     private const val EXTRA_CATEGORY = "category"

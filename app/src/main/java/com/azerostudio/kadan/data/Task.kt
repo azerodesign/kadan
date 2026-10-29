@@ -1,10 +1,10 @@
-package com.azerostudio.disela.data
+package com.azerostudio.kadan.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /*
- * One Disela task. Offline-first, local only — no login, no sync, no cloud.
+ * One Kadan task. Offline-first, local only — no login, no sync, no cloud.
  *
  *  dueDate: epoch day (LocalDate.toEpochDay), e.g. the day a PR is due.
  *  dueTimeMinutes: minutes since midnight in Asia/Jakarta local time, or

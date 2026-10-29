@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.azerostudio.disela"
+    namespace = "com.azerostudio.kadan"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.azerostudio.disela"
+        applicationId = "com.azerostudio.kadan"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -46,10 +46,6 @@ android {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.7.0"
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -71,8 +67,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.datastore.preferences)
-    // No WorkManager in v1: reminders use AlarmManager (see ReminderScheduler.kt),
-    // and androidx.work:workmanager-ktx:2.9.0 does not resolve from Google Maven,
-    // which broke the first Gradle build. Re-add it only when a real Worker lands.
+    // No WorkManager in v1: reminders use AlarmManager (see ReminderScheduler.kt).
     ksp(libs.androidx.room.compiler)
 }

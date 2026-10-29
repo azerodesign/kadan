@@ -1,10 +1,10 @@
-package com.azerostudio.disela.data
+package com.azerostudio.kadan.data
 
 import kotlinx.coroutines.flow.Flow
 
 /*
  * Thin repository over TaskDao. It owns no scheduling: callers
- * (DiselaViewModel) schedule/cancel alarms AFTER a successful database
+ * (KadanViewModel) schedule/cancel alarms AFTER a successful database
  * write, so the database is never left claiming a reminder that was not
  * scheduled, and an alarm is never scheduled for a task that failed to save.
  */

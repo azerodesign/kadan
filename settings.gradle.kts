@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Disela"
+rootProject.name = "Kadan"
 include(":app")

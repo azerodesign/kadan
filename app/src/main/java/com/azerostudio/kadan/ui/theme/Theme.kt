@@ -1,4 +1,4 @@
-package com.azerostudio.disela.ui.theme
+package com.azerostudio.kadan.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 /*
- * DiselaTheme — the single theme wrapper for the whole app.
+ * KadanTheme — the single theme wrapper for the whole app.
  * MainActivity wraps ALL of setContent in this. Anything drawn outside
  * this wrapper silently gets the baseline Material theme, so never launch
  * a dialog or a new screen outside it.
@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
  * more than wallpaper matching.
  */
 @Composable
-fun DiselaTheme(
+fun KadanTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -41,8 +41,8 @@ fun DiselaTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = DiselaTypography,
-        shapes = DiselaShapes,
+        typography = KadanTypography,
+        shapes = KadanShapes,
         content = content
     )
 }

@@ -1,8 +1,8 @@
-package com.azerostudio.disela
+package com.azerostudio.kadan
 
 import android.app.Application
-import com.azerostudio.disela.notifications.NotificationHelper
-import com.azerostudio.disela.notifications.ReminderScheduler
+import com.azerostudio.kadan.notifications.NotificationHelper
+import com.azerostudio.kadan.notifications.ReminderScheduler
 
 /*
  * Application entry point.
@@ -11,7 +11,7 @@ import com.azerostudio.disela.notifications.ReminderScheduler
  * next weekday 15:15 and replaces the same PendingIntent, so calling it
  * on every launch cannot double-schedule the nudge.
  */
-class DiselaApplication : Application() {
+class KadanApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationHelper.createChannel(this)

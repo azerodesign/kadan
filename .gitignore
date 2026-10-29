@@ -1,4 +1,4 @@
-# Disela .gitignore — standard Android, plus local build outputs.
+# Kadan .gitignore — standard Android, plus local build outputs.
 *.iml
 .gradle/
 local.properties

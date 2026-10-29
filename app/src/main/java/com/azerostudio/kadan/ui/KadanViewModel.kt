@@ -1,10 +1,10 @@
-package com.azerostudio.disela.ui
+package com.azerostudio.kadan.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.azerostudio.disela.data.Category
-import com.azerostudio.disela.data.Task
-import com.azerostudio.disela.data.TaskRepository
+import com.azerostudio.kadan.data.Category
+import com.azerostudio.kadan.data.Task
+import com.azerostudio.kadan.data.TaskRepository
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /*
- * DiselaViewModel — the only place HomeScreen gets data from.
+ * KadanViewModel — the only place HomeScreen gets data from.
  * Scheduling is NOT done here in the abstract: MainActivity / the caller
  * passes a scheduler lambda so the ViewModel stays testable without an
  * Android Context, while the real app wires it to ReminderScheduler.
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
  * onTaskSaved = { task -> ReminderScheduler.scheduleDue(context, task) }
  * and onTaskRemoved = { id -> ReminderScheduler.cancelDue(context, id) }.
  */
-class DiselaViewModel(
+class KadanViewModel(
     private val repository: TaskRepository,
     private val onTaskSaved: (Task) -> Unit = {},
     private val onTaskRemoved: (Long) -> Unit = {}

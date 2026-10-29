@@ -1,9 +1,9 @@
-package com.azerostudio.disela.notifications
+package com.azerostudio.kadan.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.azerostudio.disela.data.DiselaDatabase
+import com.azerostudio.kadan.data.KadanDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +20,7 @@ class BootReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val tasks = DiselaDatabase.get(context).taskDao().getAll()
+                val tasks = KadanDatabase.get(context).taskDao().getAll()
                 for (task in tasks) {
                     ReminderScheduler.scheduleDue(context, task)
                 }

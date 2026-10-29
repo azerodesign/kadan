@@ -1,12 +1,12 @@
-# Disela — v1
+# Kadan — v1
 
-Disela adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
+Kadan adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
 spesifik: Wildan sering lupa apa yang harus dikerjakan hari itu. Bukan
 todo list pasif yang harus dibuka dulu baru ingat, tapi **reminder-first**:
 aplikasi yang nyamperin lewat notifikasi.
 
-- **Nama:** Disela (dari "di sela" — aplikasi yang hidup di sela-sela hari)
-- **Paket:** `com.azerostudio.disela`
+- **Nama:** Kadan (sebelumnya Disela)
+- **Paket:** `com.azerostudio.kadan`
 - **Bahasa:** 100% Kotlin
 - **UI:** Jetpack Compose, Material 3 Expressive **saja** via
   `androidx.compose.material3`. Jangan impor `androidx.compose.material`
@@ -47,7 +47,7 @@ ulang). Menutup Snackbar tanpa Urungkan berarti hapus permanen.
 ## Pengingat — bagian tersulit, dan yang paling jujur dibatasi
 
 ### 1. Nudge capture PR — Senin–Jumat 15:15 WIB
-Setiap hari kerja, Disela mengirim notifikasi: **"Hari ini ada PR apa?"**
+Setiap hari kerja, Kadan mengirim notifikasi: **"Hari ini ada PR apa?"**
 Mengetuknya membuka capture sheet dengan kategori PR sudah terpilih.
 Ini menjawab jebakan utama PR: kalau PR-nya saja lupa, maka PR itu juga
 tidak akan pernah diinput. Nudge ini adalah pengingat untuk *mencatat*,
@@ -84,7 +84,7 @@ belum selesai dan rantai nudge PR setelah `BOOT_COMPLETED`.
 ### Peringatan MIUI / Redmi — baca sebelum mengklaim pengingat "berfungsi"
 Xiaomi (MIUI) agresif mematikan alarm/notifikasi aplikasi demi hemat
 baterai, terlepas dari apakah kode di atas sudah benar. **Pengingat
-Disela belum terbukti berfungsi sampai diuji di HP Redmi yang nyata,
+Kadan belum terbukti berfungsi sampai diuji di HP Redmi yang nyata,
 dengan aplikasi dikecualikan dari optimasi baterai.** Build yang lolos
 di VM atau di CI tidak membuktikan apa-apa soal ini. Lihat "Yang harus
 diuji pertama" di bawah.
@@ -107,7 +107,7 @@ diuji pertama" di bawah.
 - **Ikon launcher final:** ikon yang ada sekarang adalah placeholder
   (cakram putih dengan celah di tengah, di
   `res/drawable/ic_launcher_foreground.xml`). Notifikasi v1 memakai ikon
-  info sistem. Ganti keduanya begitu aset ikon Disela yang sebenarnya
+  info sistem. Ganti keduanya begitu aset ikon Kadan yang sebenarnya
   tersedia.
 
 ## Cara build
@@ -117,7 +117,7 @@ diuji pertama" di bawah.
    memutuskan nama repo dan visibilitasnya).
 2. Salin seluruh isi folder ini ke root repo.
 3. Push ke branch `main`. Workflow `.github/workflows/android.yml`
-   otomatis berjalan dan mengunggah artefak `disela-debug-apk`
+   otomatis berjalan dan mengunggah artefak `kadan-debug-apk`
    (file `app-debug.apk`, debug, belum ditandatangani rilis).
 4. Unduh APK itu dari tab Actions repo, instal di HP Redmi, dan uji
    sesuai daftar di bawah.
@@ -182,7 +182,7 @@ bukan APK biner. Lihat "Status verifikasi" di bawah.
    font terbesar, pastikan tidak ada teks terpotong dan tidak ada warna
    yang hilang.
 5. **Optimasi baterai MIUI:** jika notifikasi tidak bunyi, cek
-   Pengaturan → Baterai → Disela → "Tanpa batasan" / whitelist, lalu
+   Pengaturan → Baterai → Kadan → "Tanpa batasan" / whitelist, lalu
    ulangi tes 1–2. Ini adalah langkah yang paling sering menentukan
    apakah reminder app "berfungsi" di Xiaomi.
 
@@ -193,12 +193,12 @@ settings.gradle.kts, build.gradle.kts, gradle.properties
 gradle/libs.versions.toml, gradle/wrapper/gradle-wrapper.properties
 app/build.gradle.kts, app/proguard-rules.pro
 app/src/main/AndroidManifest.xml
-app/src/main/java/com/azerostudio/disela/
-  MainActivity.kt, DiselaApplication.kt
-  data/ Category.kt, Task.kt, TaskDao.kt, DiselaDatabase.kt, TaskRepository.kt
+app/src/main/java/com/azerostudio/kadan/
+  MainActivity.kt, KadanApplication.kt
+  data/ Category.kt, Task.kt, TaskDao.kt, KadanDatabase.kt, TaskRepository.kt
   notifications/ NotificationHelper.kt, ReminderScheduler.kt,
                  ReminderReceiver.kt, PrNudgeReceiver.kt, BootReceiver.kt
-  ui/ DiselaViewModel.kt, HomeScreen.kt, CaptureSheet.kt
+  ui/ KadanViewModel.kt, HomeScreen.kt, CaptureSheet.kt
   ui/theme/ Color.kt, Type.kt, Shape.kt, Theme.kt
 .github/workflows/android.yml
 ```

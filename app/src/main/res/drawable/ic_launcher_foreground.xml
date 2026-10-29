@@ -4,10 +4,8 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      Minimal Disela foreground: a white disc with a gap (the "sela" /
-      gap in the middle of the day). This is a placeholder icon, not a
-      final brand mark — replace it when a proper Disela icon is designed.
-      It exists so the project actually builds: AndroidManifest references
+      Minimal Kadan foreground: placeholder icon mark.
+      It exists so the project builds: AndroidManifest references
       @mipmap/ic_launcher, and a missing launcher icon is a build failure.
     -->
     <path

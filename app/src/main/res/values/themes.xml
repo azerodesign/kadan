@@ -7,7 +7,7 @@
       No colours are invented here: the window background is the platform
       default and Compose's MaterialTheme takes over immediately.
     -->
-    <style name="Theme.Disela" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Kadan" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

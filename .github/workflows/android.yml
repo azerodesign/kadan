@@ -1,6 +1,6 @@
-# Disela — Android debug APK build (GitHub Actions).
+# Kadan — Android debug APK build (GitHub Actions).
 #
-# Why this exists: Disela was authored in a VM with no Android SDK and
+# Why this exists: Kadan was authored in a VM with no Android SDK and
 # almost no free RAM, so a local Gradle build there is not a realistic
 # path to a testable APK. This workflow builds the debug APK in the
 # cloud on every push to main and on pull requests, using the standard
@@ -17,10 +17,10 @@
 # "Failed to find package 'tools'" / sdkmanager exit code 1 — the
 # obsolete 'tools' package no longer exists. ubuntu-latest runners
 # already ship an Android SDK, so this workflow only ensures the
-# exact platform/build-tools Disela needs (compileSdk/targetSdk 34)
+# exact platform/build-tools Kadan needs (compileSdk/targetSdk 34)
 # are installed via the runner's own cmdline-tools sdkmanager.
 #
-# The debug APK is uploaded as an artifact named "disela-debug-apk".
+# The debug APK is uploaded as an artifact named "kadan-debug-apk".
 # It is NOT signed for release and NOT published to Google Play.
 # Release signing (keystore, signing config, Play upload) is out of v1
 # scope and must be added deliberately, never with a keystore committed
@@ -70,6 +70,6 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: disela-debug-apk
+          name: kadan-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

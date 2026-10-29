@@ -1,4 +1,4 @@
-package com.azerostudio.disela.notifications
+package com.azerostudio.kadan.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
