@@ -312,13 +312,18 @@ fun HomeScreen(
                 }
             }
 
+            // v1.4.1: animateItem() dropped. It is the most
+            // version-sensitive call added in v1.4 (LazyItemScope
+            // animation API varies across Compose releases) and the
+            // prime suspect for the v1.4 CI failure, while hero/stat
+            // motion (AnimatedVisibility) is kept. Rows animate via
+            // the checkbox/material defaults only.
             items(visibleTasks, key = { it.id }) { task ->
                 TaskRow(
                     task = task,
                     overdue = isOverdue(task),
                     onToggle = { viewModel.toggleDone(task) },
-                    onOpenEdit = { viewModel.openEdit(task) },
-                    modifier = Modifier.animateItem()
+                    onOpenEdit = { viewModel.openEdit(task) }
                 )
             }
 
@@ -538,8 +543,7 @@ private fun TaskRow(
     task: Task,
     overdue: Boolean,
     onToggle: () -> Unit,
-    onOpenEdit: () -> Unit,
-    modifier: Modifier = Modifier
+    onOpenEdit: () -> Unit
 ) {
     val dueDate = LocalDate.ofEpochDay(task.dueDate)
     val dateText = dueDate.format(
@@ -582,7 +586,7 @@ private fun TaskRow(
         } else {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         },
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .semantics { contentDescription = "Tugas: ${task.title}" }
     ) {

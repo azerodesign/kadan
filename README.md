@@ -1,4 +1,4 @@
-# Kadan — v1.4
+# Kadan — v1.4.1
 
 Kadan adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
 spesifik: Wildan sering lupa apa yang harus dikerjakan hari itu. Bukan
@@ -14,6 +14,20 @@ aplikasi yang nyamperin lewat notifikasi.
 - **Data:** Room, lokal saja. Tanpa login, tanpa sync, tanpa iklan.
 - **Ringan:** tanpa backend, tanpa gambar berat, target HP mid-range
   dengan storage terbatas.
+
+## Baru di v1.4.1 — Run baru, tersangka utama dicopot
+
+v1.4 gagal di CI pada step Build debug APK dengan satu-satunya
+error publik "Process completed with exit code 1" — isi log-nya
+hanya bisa dibaca setelah sign-in GitHub, jadi penyebab pastinya
+belum terverifikasi dari log. v1.4.1 ini adalah run baru dengan
+perbaikan tersangka utama, bukan tebak-tebakan buta: `animateItem()`
+di baris tugas dicopot, karena itu panggilan paling sensitif
+versi di antara semua yang ditambahkan v1.4, sementara motion
+hero/stat (AnimatedVisibility) dipertahankan. Kalau run ini hijau,
+tersangkanya terkonfirmasi; kalau masih merah, tersangka
+berikutnya adalah dependency animasi / icon vector, dan log dari
+run baru inilah yang akan dibaca.
 
 ## Baru di v1.4 — Design lock ala Fotara, tapi tetap Kadan
 

@@ -19,8 +19,9 @@ import androidx.compose.animation.slideInVertically
  *    a spring — it is the first thing the eye lands on.
  *  - Stats: fade + small rise, staggered 80 ms apart. Same tween,
  *    same distance, only the delay differs.
- *  - Task rows: LazyColumn animateItem (Compose default), no custom
- *    animation here — rows must never fight the list.
+ *  - Task rows (v1.4.1): NO list animation — animateItem() was
+ *    dropped as the prime CI-failure suspect. Rows must never fight
+ *    the list, and they must never break the build to look fancy.
  *
  * Anything not listed here does not animate. A reminder app that
  * animates everything feels slow; a reminder app that animates one
