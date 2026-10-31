@@ -1,5 +1,6 @@
 package com.azerostudio.kadan.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -29,13 +30,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,20 +47,23 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.azerostudio.kadan.data.Category
 import com.azerostudio.kadan.data.Task
+import com.azerostudio.kadan.ui.theme.HeroEnterTransition
+import com.azerostudio.kadan.ui.theme.KadanSpacing
 import com.azerostudio.kadan.ui.theme.ThemeMode
+import com.azerostudio.kadan.ui.theme.statEnterTransition
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /*
- * Home screen — "Hari Ini", v1.3 redesign.
+ * Home screen — "Hari Ini", v1.4 design lock.
  *
- * v1.3 is a VISUAL break from v1.2, not another token tweak: a solid
- * ocean hero card (headline status + today progress) replaces the grey
- * summary strip, the three counts become three separate stat cards,
- * the FAB is solid ocean, and the theme picker moves out of the top
- * of the screen into a footer card. Nothing about reminders, data or
- * capture changes — this file only re-presents the same counts.
+ * v1.3 was the visual break (solid ocean hero, separate stat cards,
+ * solid FAB, theme in the footer). v1.4 is the Fotara lesson applied:
+ * the look is now LOCKED to tokens, not per-screen taste — spacing
+ * from KadanSpacing, top bar from KadanTopBar, motion from Motion.kt.
+ * Nothing about reminders, data or capture changes — this file only
+ * re-presents the same counts, through the same tokens, every time.
  *
  * Material 3 rules applied here (see the Kadan Material guide):
  *  - Scaffold slots only: TopAppBar, floatingActionButton, snackbarHost.
@@ -137,27 +141,14 @@ fun HomeScreen(
         }
     }
 
+    // v1.4 entry motion: start hidden, flip to visible once, so the
+    // hero spring + stat stagger actually play on first open. This
+    // state is presentation-only; it never touches tasks or reminders.
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                ),
-                title = {
-                    Column {
-                        Text(
-                            text = "KADAN",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "Hari Ini",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-                }
-            )
-        },
+        topBar = { KadanTopBar(title = "Hari Ini") },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { viewModel.openCapture(Category.PR.label) },
@@ -173,8 +164,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = KadanSpacing.Screen),
+            verticalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
         ) {
             // Exact-alarm banner: only when the system has not granted it.
             // Without this, due reminders silently fall back to inexact
@@ -187,7 +178,7 @@ fun HomeScreen(
                             contentColor = MaterialTheme.colorScheme.onErrorContainer
                         )
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(KadanSpacing.Card)) {
                             Text(
                                 text = "Izin alarm tepat belum aktif",
                                 style = MaterialTheme.typography.titleMedium
@@ -205,48 +196,67 @@ fun HomeScreen(
             }
 
             // v1.3 hero: solid ocean, one status headline, today's
-            // progress bar. This is the first thing on screen, so even
-            // with zero tasks the screen cannot look like v1.2's grey
-            // strip anymore. Overdue is still words + colour, never
-            // colour alone, and the next task is named, not counted.
+            // progress bar. v1.4: it drops in on the locked spring.
+            // Overdue is still words + colour, never colour alone,
+            // and the next task is named, not counted.
             item {
-                HeroCard(
-                    dateText = today.format(
-                        DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID"))
-                    ),
-                    overdueCount = overdueCount,
-                    unfinishedCount = unfinishedCount,
-                    nextTaskTitle = nextTask?.title,
-                    doneTodayCount = doneTodayCount,
-                    todayTotalCount = todayTotalCount
-                )
+                AnimatedVisibility(
+                    visible = entered,
+                    enter = HeroEnterTransition
+                ) {
+                    HeroCard(
+                        dateText = today.format(
+                            DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID"))
+                        ),
+                        overdueCount = overdueCount,
+                        unfinishedCount = unfinishedCount,
+                        nextTaskTitle = nextTask?.title,
+                        doneTodayCount = doneTodayCount,
+                        todayTotalCount = todayTotalCount
+                    )
+                }
             }
 
             // v1.3 stat cards: three separate cards, not one strip.
             // Telat turns errorContainer only when it is above zero.
+            // v1.4: same cards, staggered fade + rise, 80 ms apart.
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
                 ) {
-                    StatCard(
-                        number = dueTodayCount,
-                        label = "Hari ini",
-                        isAlert = false,
+                    AnimatedVisibility(
+                        visible = entered,
+                        enter = statEnterTransition(0),
                         modifier = Modifier.weight(1f)
-                    )
-                    StatCard(
-                        number = overdueCount,
-                        label = "Telat",
-                        isAlert = overdueCount > 0,
+                    ) {
+                        StatCard(
+                            number = dueTodayCount,
+                            label = "Hari ini",
+                            isAlert = false
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = entered,
+                        enter = statEnterTransition(80),
                         modifier = Modifier.weight(1f)
-                    )
-                    StatCard(
-                        number = unfinishedCount,
-                        label = "Belum selesai",
-                        isAlert = false,
+                    ) {
+                        StatCard(
+                            number = overdueCount,
+                            label = "Telat",
+                            isAlert = overdueCount > 0
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = entered,
+                        enter = statEnterTransition(160),
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        StatCard(
+                            number = unfinishedCount,
+                            label = "Belum selesai"
+                        )
+                    }
                 }
             }
 
@@ -254,7 +264,7 @@ fun HomeScreen(
             item {
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Gap)
                 ) {
                     FilterChip(
                         selected = selectedCategory == null,
@@ -282,7 +292,7 @@ fun HomeScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
+                                .padding(KadanSpacing.Hero),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -290,7 +300,7 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(KadanSpacing.Tiny))
                             Text(
                                 text = "Ketuk Tambah buat tugas pertama, atau tunggu nudge PR jam 15:15.",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -307,7 +317,8 @@ fun HomeScreen(
                     task = task,
                     overdue = isOverdue(task),
                     onToggle = { viewModel.toggleDone(task) },
-                    onOpenEdit = { viewModel.openEdit(task) }
+                    onOpenEdit = { viewModel.openEdit(task) },
+                    modifier = Modifier.animateItem()
                 )
             }
 
@@ -321,7 +332,7 @@ fun HomeScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item { Spacer(modifier = Modifier.height(KadanSpacing.FabClearance)) }
         }
     }
 
@@ -374,25 +385,25 @@ private fun HeroCard(
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(KadanSpacing.Hero)) {
             Text(
                 text = dateText.uppercase(Locale("id", "ID")),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(KadanSpacing.Small))
             Text(
                 text = headline,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(KadanSpacing.Tiny))
             Text(
                 text = sub,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(KadanSpacing.Large))
             if (todayTotalCount > 0) {
                 // Custom bar (no LinearProgressIndicator API gamble):
                 // track = primaryContainer, fill = onPrimary.
@@ -413,7 +424,7 @@ private fun HeroCard(
                             .background(MaterialTheme.colorScheme.onPrimary)
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(KadanSpacing.Small))
                 Text(
                     text = "$doneTodayCount dari $todayTotalCount tugas hari ini selesai",
                     style = MaterialTheme.typography.bodySmall,
@@ -450,12 +461,12 @@ private fun StatCard(
                 MaterialTheme.colorScheme.onSurface
             }
         ),
-        modifier = modifier
+        modifier = modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(KadanSpacing.Compact)) {
             Box(
                 modifier = Modifier
-                    .size(width = 28.dp, height = 4.dp)
+                    .size(width = KadanSpacing.AccentWidth, height = KadanSpacing.AccentHeight)
                     .clip(MaterialTheme.shapes.small)
                     .background(
                         if (isAlert) {
@@ -465,7 +476,7 @@ private fun StatCard(
                         }
                     )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(KadanSpacing.Small))
             Text(
                 text = "$number",
                 style = MaterialTheme.typography.headlineMedium
@@ -494,14 +505,14 @@ private fun ThemeCard(
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(KadanSpacing.Card)) {
             Text(
                 text = "Tampilan",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(KadanSpacing.Small))
+            Row(horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Gap)) {
                 FilterChip(
                     selected = themeMode == ThemeMode.SYSTEM,
                     onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
@@ -527,7 +538,8 @@ private fun TaskRow(
     task: Task,
     overdue: Boolean,
     onToggle: () -> Unit,
-    onOpenEdit: () -> Unit
+    onOpenEdit: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dueDate = LocalDate.ofEpochDay(task.dueDate)
     val dateText = dueDate.format(
@@ -570,14 +582,14 @@ private fun TaskRow(
         } else {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = "Tugas: ${task.title}" }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(KadanSpacing.Compact),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(

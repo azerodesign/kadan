@@ -13,8 +13,8 @@ android {
         applicationId = "com.azerostudio.kadan"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.3.0"
+        versionCode = 4
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     // Material 3 Expressive ONLY. Never add androidx.compose.material (M2).
     implementation(libs.androidx.material3)
+    // v1.4 motion (AnimatedVisibility + spring/tween specs in ui/theme/Motion.kt).
+    implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

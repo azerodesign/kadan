@@ -4,14 +4,20 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      Minimal Kadan foreground: placeholder icon mark.
-      It exists so the project builds: AndroidManifest references
-      @mipmap/ic_launcher, and a missing launcher icon is a build failure.
+      Kadan launcher mark, v1.4 — original, not copied from any other app.
+      A bold white "K" drawn as three strokes (stem + two diagonals) on
+      the ocean background supplied by the adaptive-icon background
+      colour (@color/ic_launcher_background, #0369A1). Stroke, not a
+      filled polygon, so the mark stays legible when the launcher
+      scales it down. The 26–82 box sits inside the adaptive-icon
+      safe zone (21–87), so no launcher crop cuts the letter.
+      This is a vector drawable, so it pushes through the GitHub
+      connector like any other text file — unlike raster PNG icons,
+      which still need a manual upload.
     -->
     <path
-        android:fillColor="@color/ic_launcher_foreground"
-        android:pathData="M54,54m-28,0a28,28 0,1,1 56,0a28,28 0,1,1 -56,0" />
-    <path
-        android:fillColor="@color/ic_launcher_background"
-        android:pathData="M54,34h8v40h-8z" />
+        android:strokeColor="@color/ic_launcher_foreground"
+        android:strokeWidth="12"
+        android:strokeLineCap="square"
+        android:pathData="M44,26 L44,82 M44,54 L80,26 M44,54 L80,82" />
 </vector>

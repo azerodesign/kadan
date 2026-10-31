@@ -1,4 +1,4 @@
-# Kadan — v1.3
+# Kadan — v1.4
 
 Kadan adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
 spesifik: Wildan sering lupa apa yang harus dikerjakan hari itu. Bukan
@@ -14,6 +14,42 @@ aplikasi yang nyamperin lewat notifikasi.
 - **Data:** Room, lokal saja. Tanpa login, tanpa sync, tanpa iklan.
 - **Ringan:** tanpa backend, tanpa gambar berat, target HP mid-range
   dengan storage terbatas.
+
+## Baru di v1.4 — Design lock ala Fotara, tapi tetap Kadan
+
+v1.3 merombak tampilan; v1.4 mengunci supaya tampilan itu tidak
+melenceng lagi tiap ada layar baru. Pelajarannya dari Fotara
+(analisis 2026-11-01, dari release notes publiknya — bukan dari
+kode/asetnya, yang proprietary dan tidak dipublish): produk keliatan
+cakep bukan karena satu layar, tapi karena semua layar pakai angka
+yang sama, motion yang sama, dan ikon yang beneran.
+
+- **Token spacing terkunci (`ui/theme/Spacing.kt`):** Screen 16,
+  Section 12, Gap 8, Card 16, Compact 12, Hero 20, Tiny 4, Small 8,
+  Large 16, FabClearance 80. Layar dilarang invent padding/gap di
+  luar skala ini — kalau butuh angka baru, tambah di sini dulu.
+- **Satu top bar (`ui/KadanTopBar.kt`):** tidak ada layar yang
+  membangun TopAppBar sendiri lagi. Warna container, label brand
+  "KADAN", ukuran headline, dan slot actions selalu sama, jadi
+  ikon tidak geser-geser antar layar.
+- **Satu motion (`ui/theme/Motion.kt`):** hero masuk pakai spring
+  (drop -1/3 tinggi, damping 0.8, stiffness medium-low) + fade;
+  kartu statistik fade + naik kecil, stagger 80 ms; baris tugas
+  pakai `animateItem` bawaan LazyColumn. Selain itu tidak ada
+  animasi — app pengingat yang menganimasikan segalanya terasa
+  lambat, yang menganimasikan satu hal saat masuk terasa hidup.
+- **Ikon launcher final (vector, bukan placeholder):** huruf K
+  putih tebal dari tiga stroke di atas background biru laut
+  `#0369A1` (`ic_launcher_foreground.xml`). Karena ini vector
+  XML, ia bisa di-push lewat connector seperti file teks biasa —
+  tidak seperti PNG yang harus di-upload manual. Ikon notifikasi
+  masih pakai ikon info sistem — itu PR terpisah.
+- **Yang TIDAK berubah:** logika pengingat, nudge PR 15:15 WIB,
+  BootReceiver, widget, DataStore tema, Room `kadan.db`,
+  applicationId, warna Biru Laut + Charcoal. Identitas Kadan
+  dipertahankan; yang ditiru dari Fotara adalah disiplinnya,
+  bukan warna cyan-glow / navy-nya, bukan densitas workspace-nya
+  (Kadan tetap reminder-first, Home tetap satu layar cepat).
 
 ## Baru di v1.3 — Rombak Home, biar bedanya keliatan
 
@@ -214,8 +250,9 @@ lagi untuk klaim 'belum pernah di-build'.
 **v1.2 terbukti terinstal di HP Wildan 2026-11-01** (screenshot:
 chip Tema + header angka 0/0/0 ada di layar) — tapi tampilannya
 dinilai "gada bedanya sama Disela", makanya v1.3 ini dirombak.
-**v1.3 sendiri BELUM pernah di-build** sampai push ini memicu CI
-di repo Kadan.
+**v1.3 sendiri BELUM pernah di-build** sampai push v1.3 memicu CI
+di repo Kadan; **v1.4 juga BELUM pernah di-build** sampai push
+ini memicu CI yang sama.
 
 ## Status verifikasi asli v1 (per 2026-10-25, sebelum rename)
 

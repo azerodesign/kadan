@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Launcher icon colours only. v1.2: ocean blue background to match the Kadan brand (Color.kt). App UI colours live in ui/theme/Color.kt. -->
+    <!-- Launcher icon colours only. v1.4: ocean blue background + white K stroke (ic_launcher_foreground.xml) to match the Kadan brand (Color.kt). App UI colours live in ui/theme/Color.kt. -->
     <color name="ic_launcher_background">#0369A1</color>
     <color name="ic_launcher_foreground">#FFFFFF</color>
 </resources>
