@@ -1,4 +1,4 @@
-# Kadan — v1.2
+# Kadan — v1.3
 
 Kadan adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
 spesifik: Wildan sering lupa apa yang harus dikerjakan hari itu. Bukan
@@ -14,6 +14,36 @@ aplikasi yang nyamperin lewat notifikasi.
 - **Data:** Room, lokal saja. Tanpa login, tanpa sync, tanpa iklan.
 - **Ringan:** tanpa backend, tanpa gambar berat, target HP mid-range
   dengan storage terbatas.
+
+## Baru di v1.3 — Rombak Home, biar bedanya keliatan
+
+v1.2 cuma ganti token warna, dan itu terbukti keliatan sama kayak
+Disela di HP nyata (laporan Wildan 2026-11-01). v1.3 merombak layar
+Hari Ini-nya, tanpa mengubah logika pengingat, data, atau capture:
+
+- **Hero card biru laut solid:** kartu `primary` (bukan abu-abu lagi)
+  dengan tanggal, satu headline status ("X tugas telat." /
+  "X tugas tersisa." / "Hari ini bersih."), tugas berikutnya, dan
+  progress bar tugas hari ini (selesai / total tugas jatuh tempo
+  hari ini saja — tugas masa depan tidak ikut menggelembungkan bar).
+- **Tiga kartu statistik terpisah:** Hari ini / Telat / Belum selesai
+  jadi tiga kartu sendiri dengan strip aksen, bukan satu strip angka.
+  Kartu Telat jadi `errorContainer` hanya kalau angkanya di atas nol.
+- **FAB solid biru laut:** tombol Tambah pakai `primary`/`onPrimary`,
+  bukan `primaryContainer` yang pudar.
+- **Top bar bermerek:** label "KADAN" kecil warna primary di atas
+  "Hari Ini" headline, di atas `surfaceContainerLow`.
+- **Tema pindah ke footer:** chip Sistem / Terang / Gelap sekarang di
+  kartu "Tampilan" di bawah daftar tugas, jadi bagian atas layar
+  bersih untuk hero + statistik. Persistensi DataStore tidak berubah.
+- **Kartu tugas ber-border:** tugas normal pakai `surfaceContainer`
+  + border `outlineVariant` supaya kartunya kebaca di charcoal;
+  tugas telat tetap `errorContainer` + kata "Telat".
+- **Empty state baru:** kartu "Semua beres." menggantikan teks
+  "Belum ada tugas" yang polos.
+- **Yang TIDAK berubah:** semua logika v1.2 (alarm exact, nudge PR
+  15:15 WIB, BootReceiver, widget, DataStore tema, Room `kadan.db`,
+  applicationId sama — tugas lama tetap kebawa).
 
 ## Baru di v1.2 — Biru Laut + Hitam Charcoal, gaya semi-tech / SaaS
 
@@ -180,8 +210,12 @@ bukan APK biner. Lihat "Status verifikasi" di bawah.
 sukses, rilis v1.0.0 debug APK 9.59 MB, notifikasi bunyi di HP nyata,
 dan nudge PR Senin 2026-10-26 15:15 WIB muncul. Bagian di bawah ini
 adalah status ASLI saat v1 pertama ditulis, dan sudah tidak berlaku
-lagi untuk klaim 'belum pernah di-build' — v1.2 sendiri BELUM
-pernah di-build sampai CI di repo Kadan berjalan.
+lagi untuk klaim 'belum pernah di-build'.
+**v1.2 terbukti terinstal di HP Wildan 2026-11-01** (screenshot:
+chip Tema + header angka 0/0/0 ada di layar) — tapi tampilannya
+dinilai "gada bedanya sama Disela", makanya v1.3 ini dirombak.
+**v1.3 sendiri BELUM pernah di-build** sampai push ini memicu CI
+di repo Kadan.
 
 ## Status verifikasi asli v1 (per 2026-10-25, sebelum rename)
 

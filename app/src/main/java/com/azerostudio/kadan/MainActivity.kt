@@ -31,9 +31,9 @@ import com.azerostudio.kadan.ui.HomeScreen
 import com.azerostudio.kadan.ui.theme.KadanTheme
 
 /*
- * MainActivity — the single activity of Kadan v1.2.
+ * MainActivity — the single activity of Kadan v1.3.
  *
- * v1.2 additions: theme mode is read from DataStore (ThemePreferences)
+ * v1.2 additions (kept in v1.3): theme mode is read from DataStore (ThemePreferences)
  * and resolved here, and every task save/remove also refreshes the
  * Hari Ini home widget so the widget never shows stale counts.
  *
