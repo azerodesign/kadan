@@ -7,79 +7,88 @@ import androidx.compose.ui.graphics.Color
 /*
  * THE ONLY file in Kadan where literal colours may appear.
  *
- * Rule (Material 3, see the Kadan Material guide): screens must never use
- * a hex value or Color.White/Black directly. They read roles only, e.g.
- * MaterialTheme.colorScheme.primary, .surfaceContainerLow,
- * .onSurfaceVariant, .errorContainer. That is what makes dark theme,
- * dynamic colour and high contrast work without touching every screen.
+ * Kadan v1.2 brand — Biru Laut + Hitam Charcoal, gaya semi-tech / SaaS.
+ *  - Biru Laut (Ocean Blue): deep ocean #0369A1 in light, bright ocean
+ *    #38B6E8 in dark so it stays legible on charcoal.
+ *  - Hitam Charcoal: dark background #0C1116, cards one layer lighter
+ *    (#17222A), never pure black cards on pure black background.
+ *  - Light scheme is the same brand in reverse: pale ocean-tinted
+ *    surfaces (#F2F6F9) so light and dark feel like one product, not two.
  *
- * These two schemes are the Material 3 baseline tonal schemes. When a brand
- * seed colour is chosen for Kadan, replace this file with the export from
- * Google's Material Theme Builder (it emits exactly these two schemes) —
- * no screen code changes are needed, because screens only use roles.
+ * Rule (Material 3): screens must never use a hex value or
+ * Color.White/Black directly. They read roles only, e.g.
+ * MaterialTheme.colorScheme.primary, .surfaceContainerLow,
+ * .onSurfaceVariant, .errorContainer. That is what makes light/dark
+ * switching work without touching every screen.
+ *
+ * Dynamic colour (Material You) is OFF by default in KadanTheme for v1.2:
+ * a reminder's due-time legibility and the ocean/charcoal brand matter
+ * more than wallpaper matching.
  */
 val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6750A4),
+    primary = Color(0xFF0369A1),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFEADDFF),
-    onPrimaryContainer = Color(0xFF4F378B),
-    secondary = Color(0xFF625B71),
+    primaryContainer = Color(0xFFD6EEF9),
+    onPrimaryContainer = Color(0xFF04395A),
+    secondary = Color(0xFF0E7490),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFE8DEF8),
-    onSecondaryContainer = Color(0xFF4A4458),
-    tertiary = Color(0xFF7D5260),
+    secondaryContainer = Color(0xFFCDEFF5),
+    onSecondaryContainer = Color(0xFF073A44),
+    tertiary = Color(0xFF0284C7),
     onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFFFD8E4),
-    onTertiaryContainer = Color(0xFF633B48),
+    tertiaryContainer = Color(0xFFD6EEF9),
+    onTertiaryContainer = Color(0xFF04395A),
     error = Color(0xFFB3261E),
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFF9DEDC),
     onErrorContainer = Color(0xFF410E0B),
-    surface = Color(0xFFFEF7FF),
-    onSurface = Color(0xFF1D1B20),
-    onSurfaceVariant = Color(0xFF49454F),
+    background = Color(0xFFF2F6F9),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF0C1116),
+    onSurfaceVariant = Color(0xFF4A5A66),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF7F2FA),
-    surfaceContainer = Color(0xFFF3EDF7),
-    surfaceContainerHigh = Color(0xFFECE6F0),
-    surfaceContainerHighest = Color(0xFFE6E0E9),
-    outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0),
-    inverseSurface = Color(0xFF322F35),
-    inverseOnSurface = Color(0xFFF5EFF7),
-    inversePrimary = Color(0xFFD0BCFF),
+    surfaceContainerLow = Color(0xFFEDF2F6),
+    surfaceContainer = Color(0xFFE2EAF0),
+    surfaceContainerHigh = Color(0xFFD6E0E8),
+    surfaceContainerHighest = Color(0xFFC9D6DF),
+    outline = Color(0xFF7A8A96),
+    outlineVariant = Color(0xFFC2CFD8),
+    inverseSurface = Color(0xFF17222B),
+    inverseOnSurface = Color(0xFFEAF2F7),
+    inversePrimary = Color(0xFF7DD3F0),
     scrim = Color(0xFF000000)
 )
 
 val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD0BCFF),
-    onPrimary = Color(0xFF381E72),
-    primaryContainer = Color(0xFF4F378B),
-    onPrimaryContainer = Color(0xFFEADDFF),
-    secondary = Color(0xFFCCC2DC),
-    onSecondary = Color(0xFF332D41),
-    secondaryContainer = Color(0xFF4A4458),
-    onSecondaryContainer = Color(0xFFE8DEF8),
-    tertiary = Color(0xFFEFB8C8),
-    onTertiary = Color(0xFF492532),
-    tertiaryContainer = Color(0xFF633B48),
-    onTertiaryContainer = Color(0xFFFFD8E4),
+    primary = Color(0xFF38B6E8),
+    onPrimary = Color(0xFF04293D),
+    primaryContainer = Color(0xFF0B3A52),
+    onPrimaryContainer = Color(0xFFCDEFFB),
+    secondary = Color(0xFF67C7D8),
+    onSecondary = Color(0xFF042A33),
+    secondaryContainer = Color(0xFF123A44),
+    onSecondaryContainer = Color(0xFFC5EFF5),
+    tertiary = Color(0xFF7DD3FC),
+    onTertiary = Color(0xFF04293D),
+    tertiaryContainer = Color(0xFF0B3A52),
+    onTertiaryContainer = Color(0xFFCDEFFB),
     error = Color(0xFFF2B8B5),
     onError = Color(0xFF601410),
     errorContainer = Color(0xFF8C1D18),
     onErrorContainer = Color(0xFFF9DEDC),
-    surface = Color(0xFF141218),
-    onSurface = Color(0xFFE6E0E9),
-    onSurfaceVariant = Color(0xFFCAC4D0),
-    surfaceContainerLowest = Color(0xFF0F0D13),
-    surfaceContainerLow = Color(0xFF1D1B20),
-    surfaceContainer = Color(0xFF211F26),
-    surfaceContainerHigh = Color(0xFF2B2930),
-    surfaceContainerHighest = Color(0xFF36343B),
-    outline = Color(0xFF938F99),
-    outlineVariant = Color(0xFF49454F),
-    inverseSurface = Color(0xFFE6E0E9),
-    inverseOnSurface = Color(0xFF322F35),
-    inversePrimary = Color(0xFF6750A4),
+    background = Color(0xFF0C1116),
+    surface = Color(0xFF0C1116),
+    onSurface = Color(0xFFE6EEF3),
+    onSurfaceVariant = Color(0xFFA8B8C2),
+    surfaceContainerLowest = Color(0xFF080B0E),
+    surfaceContainerLow = Color(0xFF11181E),
+    surfaceContainer = Color(0xFF17222A),
+    surfaceContainerHigh = Color(0xFF1E2B35),
+    surfaceContainerHighest = Color(0xFF283642),
+    outline = Color(0xFF8A9BA6),
+    outlineVariant = Color(0xFF33424D),
+    inverseSurface = Color(0xFFE6EEF3),
+    inverseOnSurface = Color(0xFF17222B),
+    inversePrimary = Color(0xFF0369A1),
     scrim = Color(0xFF000000)
 )

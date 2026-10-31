@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.azerostudio.kadan.data.Category
 import com.azerostudio.kadan.data.Task
+import com.azerostudio.kadan.ui.theme.ThemeMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -66,7 +67,9 @@ import java.util.Locale
 fun HomeScreen(
     viewModel: KadanViewModel,
     onOpenExactAlarmSettings: () -> Unit,
-    exactAlarmGranted: Boolean
+    exactAlarmGranted: Boolean,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val tasks by viewModel.tasks.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
@@ -91,6 +94,10 @@ fun HomeScreen(
 
     val dueTodayCount = tasks.count { !it.isDone && it.dueDate == todayEpoch }
     val overdueCount = tasks.count { isOverdue(it) }
+    val unfinishedCount = tasks.count { !it.isDone }
+    val nextTask = tasks.filter { !it.isDone }
+        .sortedWith(compareBy({ it.dueDate }, { it.dueTimeMinutes ?: 480 }))
+        .firstOrNull()
     val visibleTasks = tasks.filter { task ->
         selectedCategory == null || task.category == selectedCategory
     }
@@ -175,45 +182,16 @@ fun HomeScreen(
                 }
             }
 
-            // Counts header: due today + overdue, in words as well as colour.
+            // v1.2 summary header — widget-like SaaS card: three numbers
+            // first, words second. Overdue is still words + colour, never
+            // colour alone, and the next task is named, not just counted.
             item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(
-                                text = "$dueTodayCount jatuh tempo hari ini",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = if (overdueCount > 0) {
-                                    "$overdueCount telat — kerjakan dulu yang ini"
-                                } else {
-                                    "Tidak ada yang telat"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (overdueCount > 0) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                }
-                            )
-                        }
-                        Text(
-                            text = "${tasks.count { !it.isDone }} belum selesai",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                SummaryCard(
+                    dueTodayCount = dueTodayCount,
+                    overdueCount = overdueCount,
+                    unfinishedCount = unfinishedCount,
+                    nextTaskTitle = nextTask?.title
+                )
             }
 
             // Filter chips: All + the 5 locked categories.
@@ -232,6 +210,38 @@ fun HomeScreen(
                             selected = selectedCategory == category.label,
                             onClick = { viewModel.selectCategory(category.label) },
                             label = { Text(category.label) }
+                        )
+                    }
+                }
+            }
+
+            // v1.2 theme selector: Sistem / Terang / Gelap, persisted
+            // in DataStore via MainActivity. FilterChip row is the
+            // existing M3 pattern in this screen, so no new component
+            // type is introduced here.
+            item {
+                Column {
+                    Text(
+                        text = "Tema",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = themeMode == ThemeMode.SYSTEM,
+                            onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
+                            label = { Text("Sistem") }
+                        )
+                        FilterChip(
+                            selected = themeMode == ThemeMode.LIGHT,
+                            onClick = { onThemeModeChange(ThemeMode.LIGHT) },
+                            label = { Text("Terang") }
+                        )
+                        FilterChip(
+                            selected = themeMode == ThemeMode.DARK,
+                            onClick = { onThemeModeChange(ThemeMode.DARK) },
+                            label = { Text("Gelap") }
                         )
                     }
                 }
@@ -290,6 +300,83 @@ fun HomeScreen(
                 editingTask?.let { viewModel.delete(it) }
             }
         )
+    }
+}
+
+@Composable
+private fun SummaryCard(
+    dueTodayCount: Int,
+    overdueCount: Int,
+    unfinishedCount: Int,
+    nextTaskTitle: String?
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = "$dueTodayCount",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "Hari ini",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Column {
+                    Text(
+                        text = "$overdueCount",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (overdueCount > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                    Text(
+                        text = "Telat",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Column {
+                    Text(
+                        text = "$unfinishedCount",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "Belum selesai",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = if (nextTaskTitle != null) {
+                    "Berikutnya: $nextTaskTitle"
+                } else {
+                    "Tidak ada tugas berikutnya"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (overdueCount > 0) {
+                Text(
+                    text = "Kerjakan yang telat dulu.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
     }
 }
 

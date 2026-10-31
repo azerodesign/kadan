@@ -9,9 +9,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
+import com.azerostudio.kadan.ui.theme.ThemeMode
+import com.azerostudio.kadan.ui.theme.ThemePreferences
+import com.azerostudio.kadan.widget.KadanWidgetProvider
+import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -19,12 +26,16 @@ import com.azerostudio.kadan.data.KadanDatabase
 import com.azerostudio.kadan.data.TaskRepository
 import com.azerostudio.kadan.notifications.NotificationHelper
 import com.azerostudio.kadan.notifications.ReminderScheduler
-import com.azerostudio.kadan.ui.HomeScreen
 import com.azerostudio.kadan.ui.KadanViewModel
+import com.azerostudio.kadan.ui.HomeScreen
 import com.azerostudio.kadan.ui.theme.KadanTheme
 
 /*
- * MainActivity — the single activity of Kadan v1.
+ * MainActivity — the single activity of Kadan v1.2.
+ *
+ * v1.2 additions: theme mode is read from DataStore (ThemePreferences)
+ * and resolved here, and every task save/remove also refreshes the
+ * Hari Ini home widget so the widget never shows stale counts.
  *
  * Permissions, in order, and why each is requested where it is:
  *  1. POST_NOTIFICATIONS (Android 13+): requested once, on first launch,
@@ -60,9 +71,11 @@ class MainActivity : ComponentActivity() {
                     repository = repository,
                     onTaskSaved = { task ->
                         ReminderScheduler.scheduleDue(applicationContext, task)
+                        KadanWidgetProvider.requestUpdate(applicationContext)
                     },
                     onTaskRemoved = { taskId ->
                         ReminderScheduler.cancelDue(applicationContext, taskId)
+                        KadanWidgetProvider.requestUpdate(applicationContext)
                     }
                 ) as T
             }
@@ -85,13 +98,26 @@ class MainActivity : ComponentActivity() {
         handleCaptureIntent(intent)
 
         setContent {
-            KadanTheme {
+            val themeMode by ThemePreferences.themeModeFlow(applicationContext)
+                .collectAsState(initial = ThemeMode.SYSTEM)
+            val darkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+            KadanTheme(darkTheme = darkTheme) {
                 HomeScreen(
                     viewModel = viewModel,
                     onOpenExactAlarmSettings = {
                         ReminderScheduler.openExactAlarmSettings(this)
                     },
-                    exactAlarmGranted = exactAlarmGranted
+                    exactAlarmGranted = exactAlarmGranted,
+                    themeMode = themeMode,
+                    onThemeModeChange = { mode ->
+                        lifecycleScope.launch {
+                            ThemePreferences.setThemeMode(applicationContext, mode)
+                        }
+                    }
                 )
             }
         }
@@ -108,6 +134,7 @@ class MainActivity : ComponentActivity() {
         // Re-check on return from the system alarm settings screen, so
         // the banner disappears without requiring an app restart.
         exactAlarmGranted = ReminderScheduler.canScheduleExactAlarms(this)
+        KadanWidgetProvider.requestUpdate(this)
     }
 
     private fun handleCaptureIntent(intent: Intent?) {

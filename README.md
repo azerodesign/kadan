@@ -1,4 +1,4 @@
-# Kadan — v1
+# Kadan — v1.2
 
 Kadan adalah aplikasi pengingat pribadi, full Kotlin, untuk satu masalah
 spesifik: Wildan sering lupa apa yang harus dikerjakan hari itu. Bukan
@@ -14,6 +14,37 @@ aplikasi yang nyamperin lewat notifikasi.
 - **Data:** Room, lokal saja. Tanpa login, tanpa sync, tanpa iklan.
 - **Ringan:** tanpa backend, tanpa gambar berat, target HP mid-range
   dengan storage terbatas.
+
+## Baru di v1.2 — Biru Laut + Hitam Charcoal, gaya semi-tech / SaaS
+
+Desain dari referensi yang dikonfirmasi Wildan 2026-11-01 (kartu gelap,
+pill/chip, header ringkas ala widget, light + dark dari widget yang sama),
+diterjemahkan ke Material 3 Expressive — bukan jiplak komponen web/iOS.
+Basisnya adalah codebase Kadan yang sudah di-rename di repo ini
+(package `com.azerostudio.kadan`); v1.2 tidak mengubah package lagi.
+
+- **Tema Biru Laut + Charcoal:** light primary `#0369A1`, dark primary
+  `#38B6E8` di atas background charcoal `#0C1116`, kartu
+  `surfaceContainer #17222A`. Dynamic colour (Material You) dimatikan
+  default supaya brand konsisten. Satu-satunya file berisi hex adalah
+  `ui/theme/Color.kt`; layar lain hanya pakai color roles.
+- **Tema manual:** chip Sistem / Terang / Gelap di layar Hari Ini,
+  tersimpan di DataStore (`kadan_settings`), bertahan setelah restart.
+- **Header Hari Ini ala SaaS:** kartu ringkasan dengan angka besar —
+  Hari ini / Telat / Belum selesai — plus nama tugas berikutnya.
+  Prioritas tetap: telat dulu, lalu hari ini, lalu PR. Kata "Telat"
+  tetap dipakai, bukan warna saja.
+- **Widget Hari Ini (minimal):** `KadanWidgetProvider` + layout
+  `widget_kadan.xml` — hitungan hari ini / telat / belum selesai,
+  tugas berikutnya, tombol Tambah yang membuka capture sheet.
+  Update saat app menyimpan/menghapus tugas dan saat onResume, bukan
+  polling berkala (updatePeriodMillis = 0).
+- **Yang TIDAK berubah:** logika pengingat sama persis (alarm exact,
+  rantai nudge PR 15:15 WIB, BootReceiver, cek ulang database, plus
+  hardening notifikasi di repo: cek izin + tangkap SecurityException).
+  Ikon launcher/notifikasi masih placeholder — itu PR berikutnya,
+  bukan bagian v1.2 ini.
+
 
 ## Yang ada di v1
 
@@ -99,10 +130,10 @@ diuji pertama" di bawah.
   Rutinitas belum otomatis bergulir ke hari berikutnya. Di v1 ia
   berperilaku seperti tugas biasa; pengguna mengubah tanggalnya atau
   membuat ulang. Jangan mengklaim sebaliknya.
-- **Login, sync, backup cloud, widget, statistik, dan tema terang/gelap
-  manual:** tidak ada. Tema mengikuti sistem (terang/gelap otomatis +
-  dynamic colour di Android 12+ dengan fallback statis). Widget dan
-  statistik adalah kandidat v1.1 setelah loop inti terbukti.
+- **Login, sync, backup cloud, dan statistik:** tidak ada di v1.2.
+  Tema manual dan widget Hari Ini SUDAH ada di v1.2 (lihat di atas).
+  Statistik / streak penuh masih kandidat berikutnya, setelah loop
+  inti v1.2 terbukti di HP nyata.
 - **Edit lewat gestur swipe:** tidak ada. Edit lewat ketukan pada tugas.
 - **Ikon launcher final:** ikon yang ada sekarang adalah placeholder
   (cakram putih dengan celah di tengah, di
@@ -143,7 +174,16 @@ Proyek ini ditulis di VM tanpa Android SDK dan dengan RAM bebas
 besar + OOM). Jadi yang dikirim adalah kode lengkap + workflow CI,
 bukan APK biner. Lihat "Status verifikasi" di bawah.
 
-## Status verifikasi (jujur, per 2026-10-25)
+## Status verifikasi (jujur, diperbarui untuk v1.2)
+
+**Histori nyata v1.0.0 (era Disela, sebelum rename):** CI run #3
+sukses, rilis v1.0.0 debug APK 9.59 MB, notifikasi bunyi di HP nyata,
+dan nudge PR Senin 2026-10-26 15:15 WIB muncul. Bagian di bawah ini
+adalah status ASLI saat v1 pertama ditulis, dan sudah tidak berlaku
+lagi untuk klaim 'belum pernah di-build' — v1.2 sendiri BELUM
+pernah di-build sampai CI di repo Kadan berjalan.
+
+## Status verifikasi asli v1 (per 2026-10-25, sebelum rename)
 
 **Sudah diverifikasi di VM ini:**
 - Seluruh file Kotlin/Gradle/Manifest/workflow ada dan terbaca; tidak

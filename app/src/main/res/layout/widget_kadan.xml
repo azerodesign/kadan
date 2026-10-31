@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kadan v1.2 home widget layout. RemoteViews only: LinearLayout +
+  TextView + Button. Colours here are fixed values because RemoteViews
+  cannot read the Compose MaterialTheme; the widget is deliberately
+  charcoal + ocean blue to match the v1.2 brand in both system themes.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#17222A"
+    android:padding="16dp">
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kadan — Hari Ini"
+        android:textColor="#E6EEF3"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/widget_counts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="0 hari ini · 0 telat · 0 belum selesai"
+        android:textColor="#A8B8C2"
+        android:textSize="13sp" />
+    <TextView
+        android:id="@+id/widget_next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Tidak ada tugas berikutnya"
+        android:textColor="#E6EEF3"
+        android:textSize="13sp" />
+    <Button
+        android:id="@+id/widget_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Tambah"
+        android:textColor="#FFFFFF"
+        android:background="#0369A1" />
+</LinearLayout>
