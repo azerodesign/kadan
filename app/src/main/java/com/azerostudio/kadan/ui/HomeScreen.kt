@@ -18,15 +18,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -42,14 +42,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.azerostudio.kadan.data.Category
 import com.azerostudio.kadan.data.Task
+import com.azerostudio.kadan.ui.theme.CyanFixedDim
 import com.azerostudio.kadan.ui.theme.HeroEnterTransition
 import com.azerostudio.kadan.ui.theme.KadanSpacing
 import com.azerostudio.kadan.ui.theme.ThemeMode
@@ -130,6 +133,13 @@ fun HomeScreen(
         selectedCategory == null || task.category == selectedCategory
     }
 
+    var showTaskListSheet by remember { mutableStateOf(false) }
+
+    // Active focus task: explicitly chosen, or top overdue/today task, or first unfinished task
+    val currentFocusTask = focusSessionTask
+        ?: tasks.firstOrNull { !it.isDone && (it.dueDate == todayEpoch || isOverdue(it)) }
+        ?: tasks.firstOrNull { !it.isDone }
+
     // Delete -> Snackbar with Undo. ActionPerformed restores, Dismissed
     // just clears the pending state (the delete stays deleted).
     LaunchedEffect(pendingDeleted) {
@@ -146,234 +156,264 @@ fun HomeScreen(
         }
     }
 
-    // v1.4 entry motion: start hidden, flip to visible once, so the
-    // hero spring + stat stagger actually play on first open. This
-    // state is presentation-only; it never touches tasks or reminders.
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
 
-    Scaffold(
-        topBar = {
-            KadanTopBar(
-                title = "Hari Ini",
-                actions = {
-                    IconButton(
+    // Root UI: FocusSessionScreen is the primary default experience
+    Box(modifier = Modifier.fillMaxSize()) {
+        FocusSessionScreen(
+            task = currentFocusTask,
+            tasksCount = unfinishedCount,
+            onOpenTaskList = { showTaskListSheet = true },
+            onOpenCapture = { viewModel.openCapture(Category.PR.label) },
+            onDismiss = {
+                viewModel.closeFocusSession()
+            },
+            onStartFocus = {
+                // Focus session active
+            },
+            onSnooze = { minutes ->
+                currentFocusTask?.let { task ->
+                    viewModel.snoozeTask(task, minutes)
+                }
+            },
+            onCompleteTask = { task ->
+                viewModel.toggleDone(task)
+                if (focusSessionTask != null) {
+                    viewModel.closeFocusSession()
+                }
+            },
+            onEmergencyCall = {
+                try {
+                    val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(dialIntent)
+                } catch (_: Exception) {}
+            }
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 76.dp)
+        )
+    }
+
+    if (showTaskListSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showTaskListSheet = false },
+            containerColor = Color(0xFF181C24),
+            contentColor = Color(0xFFDFE2EE),
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                    color = Color(0xFF434655)
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = KadanSpacing.Screen)
+                    .padding(bottom = 32.dp)
+            ) {
+                // Sheet Header: Title, pending count, and Add button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Daftar Tugas",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFDFE2EE)
+                        )
+                        Text(
+                            text = "$unfinishedCount tugas belum selesai",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF8D90A0)
+                        )
+                    }
+                    TextButton(
                         onClick = {
-                            val candidate = tasks.firstOrNull { !it.isDone && (it.dueDate == todayEpoch || isOverdue(it)) }
-                                ?: tasks.firstOrNull { !it.isDone }
-                            if (candidate != null) {
-                                viewModel.openFocusSessionForTask(candidate)
-                            } else {
-                                viewModel.openFocusSessionForTask(
-                                    Task(
-                                        title = "Review draft kontrak klien baru",
-                                        category = "Kerja",
-                                        dueDate = todayEpoch,
-                                        dueTimeMinutes = 9 * 60
+                            viewModel.openCapture(Category.PR.label)
+                        }
+                    ) {
+                        Text(
+                            text = "+ Tugas",
+                            color = CyanFixedDim,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
+                ) {
+                    if (!exactAlarmGranted) {
+                        item {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(KadanSpacing.Card)) {
+                                    Text(
+                                        text = "Izin alarm tepat belum aktif",
+                                        style = MaterialTheme.typography.titleMedium
                                     )
+                                    Text(
+                                        text = "Tanpa izin ini, pengingat bisa telat. Ketuk tombol di bawah untuk mengaktifkannya di Pengaturan.",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    TextButton(onClick = onOpenExactAlarmSettings) {
+                                        Text("Buka Pengaturan Alarm")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        AnimatedVisibility(
+                            visible = entered,
+                            enter = HeroEnterTransition
+                        ) {
+                            HeroCard(
+                                dateText = today.format(
+                                    DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID"))
+                                ),
+                                overdueCount = overdueCount,
+                                unfinishedCount = unfinishedCount,
+                                nextTaskTitle = nextTask?.title,
+                                doneTodayCount = doneTodayCount,
+                                todayTotalCount = todayTotalCount
+                            )
+                        }
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
+                        ) {
+                            AnimatedVisibility(
+                                visible = entered,
+                                enter = statEnterTransition(0),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                StatCard(
+                                    number = dueTodayCount,
+                                    label = "Hari ini",
+                                    isAlert = false
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = entered,
+                                enter = statEnterTransition(80),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                StatCard(
+                                    number = overdueCount,
+                                    label = "Telat",
+                                    isAlert = overdueCount > 0
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = entered,
+                                enter = statEnterTransition(160),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                StatCard(
+                                    number = unfinishedCount,
+                                    label = "Belum selesai",
+                                    isAlert = false
                                 )
                             }
                         }
-                    ) {
-                        FocusTimerGraphic(
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
                     }
-                }
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { viewModel.openCapture(Category.PR.label) },
-                text = { Text("Tambah") },
-                icon = { Text("+") },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = KadanSpacing.Screen),
-            verticalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
-        ) {
-            // Exact-alarm banner: only when the system has not granted it.
-            // Without this, due reminders silently fall back to inexact
-            // alarms — the user must be told, not left to discover it.
-            if (!exactAlarmGranted) {
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(KadanSpacing.Card)) {
-                            Text(
-                                text = "Izin alarm tepat belum aktif",
-                                style = MaterialTheme.typography.titleMedium
+
+                    item {
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Gap)
+                        ) {
+                            FilterChip(
+                                selected = selectedCategory == null,
+                                onClick = { viewModel.selectCategory(null) },
+                                label = { Text("Semua") }
                             )
-                            Text(
-                                text = "Tanpa izin ini, pengingat bisa telat. Ketuk tombol di bawah untuk mengaktifkannya di Pengaturan.",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            TextButton(onClick = onOpenExactAlarmSettings) {
-                                Text("Buka Pengaturan Alarm")
+                            for (category in Category.entries) {
+                                FilterChip(
+                                    selected = selectedCategory == category.label,
+                                    onClick = { viewModel.selectCategory(category.label) },
+                                    label = { Text(category.label) }
+                                )
                             }
                         }
                     }
-                }
-            }
 
-            // v1.3 hero: solid ocean, one status headline, today's
-            // progress bar. v1.4: it drops in on the locked spring.
-            // Overdue is still words + colour, never colour alone,
-            // and the next task is named, not counted.
-            item {
-                AnimatedVisibility(
-                    visible = entered,
-                    enter = HeroEnterTransition
-                ) {
-                    HeroCard(
-                        dateText = today.format(
-                            DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID"))
-                        ),
-                        overdueCount = overdueCount,
-                        unfinishedCount = unfinishedCount,
-                        nextTaskTitle = nextTask?.title,
-                        doneTodayCount = doneTodayCount,
-                        todayTotalCount = todayTotalCount
-                    )
-                }
-            }
-
-            // v1.3 stat cards: three separate cards, not one strip.
-            // Telat turns errorContainer only when it is above zero.
-            // v1.4: same cards, staggered fade + rise, 80 ms apart.
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Section)
-                ) {
-                    AnimatedVisibility(
-                        visible = entered,
-                        enter = statEnterTransition(0),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        StatCard(
-                            number = dueTodayCount,
-                            label = "Hari ini",
-                            isAlert = false
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = entered,
-                        enter = statEnterTransition(80),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        StatCard(
-                            number = overdueCount,
-                            label = "Telat",
-                            isAlert = overdueCount > 0
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = entered,
-                        enter = statEnterTransition(160),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        StatCard(
-                            number = unfinishedCount,
-                            label = "Belum selesai",
-                            isAlert = false
-                        )
-                    }
-                }
-            }
-
-            // Filter chips: All + the 5 locked categories.
-            item {
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(KadanSpacing.Gap)
-                ) {
-                    FilterChip(
-                        selected = selectedCategory == null,
-                        onClick = { viewModel.selectCategory(null) },
-                        label = { Text("Semua") }
-                    )
-                    for (category in Category.entries) {
-                        FilterChip(
-                            selected = selectedCategory == category.label,
-                            onClick = { viewModel.selectCategory(category.label) },
-                            label = { Text(category.label) }
-                        )
-                    }
-                }
-            }
-
-            if (visibleTasks.isEmpty()) {
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(KadanSpacing.Hero),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Semua beres.",
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(KadanSpacing.Tiny))
-                            Text(
-                                text = "Ketuk Tambah buat tugas pertama, atau tunggu nudge PR jam 15:15.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
+                    if (visibleTasks.isEmpty()) {
+                        item {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(KadanSpacing.Hero),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Semua beres.",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(KadanSpacing.Tiny))
+                                    Text(
+                                        text = "Ketuk + Tugas buat tugas pertama.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    items(visibleTasks, key = { it.id }) { task ->
+                        TaskRow(
+                            task = task,
+                            overdue = isOverdue(task),
+                            onToggle = { viewModel.toggleDone(task) },
+                            onOpenEdit = { viewModel.openEdit(task) },
+                            onOpenFocus = {
+                                viewModel.openFocusSessionForTask(task)
+                                showTaskListSheet = false
+                            }
+                        )
+                    }
+
+                    item {
+                        ThemeCard(
+                            themeMode = themeMode,
+                            onThemeModeChange = onThemeModeChange
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
             }
-
-            // v1.4.1: animateItem() dropped. It is the most
-            // version-sensitive call added in v1.4 (LazyItemScope
-            // animation API varies across Compose releases) and the
-            // prime suspect for the v1.4 CI failure, while hero/stat
-            // motion (AnimatedVisibility) is kept. Rows animate via
-            // the checkbox/material defaults only.
-            items(visibleTasks, key = { it.id }) { task ->
-                TaskRow(
-                    task = task,
-                    overdue = isOverdue(task),
-                    onToggle = { viewModel.toggleDone(task) },
-                    onOpenEdit = { viewModel.openEdit(task) },
-                    onOpenFocus = { viewModel.openFocusSessionForTask(task) }
-                )
-            }
-
-            // v1.3: theme picker moved to the footer, so the top of the
-            // screen is the hero + stats, not settings. Same DataStore
-            // persistence via MainActivity, same three modes.
-            item {
-                ThemeCard(
-                    themeMode = themeMode,
-                    onThemeModeChange = onThemeModeChange
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(KadanSpacing.FabClearance)) }
         }
     }
 
@@ -394,30 +434,6 @@ fun HomeScreen(
             },
             onDelete = {
                 editingTask?.let { viewModel.delete(it) }
-            }
-        )
-    }
-
-    if (focusSessionTask != null) {
-        FocusSessionScreen(
-            task = focusSessionTask,
-            onDismiss = { viewModel.closeFocusSession() },
-            onSnooze = { minutes ->
-                focusSessionTask?.let { task ->
-                    viewModel.snoozeTask(task, minutes)
-                }
-            },
-            onCompleteTask = { task ->
-                viewModel.toggleDone(task)
-                viewModel.closeFocusSession()
-            },
-            onEmergencyCall = {
-                try {
-                    val dialIntent = Intent(Intent.ACTION_DIAL).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(dialIntent)
-                } catch (_: Exception) {}
             }
         )
     }

@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -73,19 +75,24 @@ import com.azerostudio.kadan.ui.theme.KadanTheme
 import kotlinx.coroutines.delay
 
 /*
- * FocusSessionScreen — Screen Sesi Fokus & Full-Screen Reminder Kadan.
+ * FocusSessionScreen — Screen Utama Sesi Fokus Kadan.
  *
- * Implements the focus session UI with dark cyber-minimalist atmosphere:
- *  - Ambient cyan radial glow overlay
- *  - Status mimic bar with pulsing cyan session indicator and silent status
+ * Implements the dark cyber-minimalist UI directly from kadan_ui_design.html:
+ *  - Ambient cyan radial glow overlay on deep dark background (#070A10)
+ *  - Status mimic bar with pulsing cyan dot and "KADAN SESSION", Silent indicator,
+ *    and quick actions for Task List and Add Task
  *  - Central squircle timer module with exact vector stopwatch illustration
  *  - Category and urgency pills
  *  - Interactive Command Hub with Emergency dialer, gradient Start/Finish button,
  *    and 10m Snooze trigger
+ *  - Minimalist gesture bar that opens the Task List sheet on tap/swipe
  */
 @Composable
 fun FocusSessionScreen(
     task: Task?,
+    tasksCount: Int = 0,
+    onOpenTaskList: () -> Unit = {},
+    onOpenCapture: () -> Unit = {},
     onDismiss: () -> Unit = {},
     onStartFocus: () -> Unit = {},
     onSnooze: (minutes: Int) -> Unit = {},
@@ -190,42 +197,66 @@ fun FocusSessionScreen(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color(0xFFC3C6D7)
                     )
                 }
 
-                // Right: Silent status + Dismiss button
+                // Right: Silent status + Task List button + Add Task button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.alpha(0.7f)
+                        modifier = Modifier
+                            .alpha(0.7f)
+                            .padding(end = 4.dp)
                     ) {
                         SilentDndIcon(
                             modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = Color(0xFFC3C6D7)
                         )
                         Text(
                             text = "Silent",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color(0xFFC3C6D7)
                         )
                     }
 
-                    // Exit / close button to return to task list
+                    // Button to open all tasks sheet
                     IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.size(32.dp)
+                        onClick = onOpenTaskList,
+                        modifier = Modifier.size(36.dp)
                     ) {
-                        Canvas(modifier = Modifier.size(14.dp)) {
-                            val stroke = 1.8f.dp.toPx()
-                            val color = Color(0xFFC3C6D7).copy(alpha = 0.8f)
-                            drawLine(color, Offset(0f, 0f), Offset(size.width, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
-                            drawLine(color, Offset(size.width, 0f), Offset(0f, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+                        BadgedBox(
+                            badge = {
+                                if (tasksCount > 0) {
+                                    Badge(
+                                        containerColor = CyanFixedDim,
+                                        contentColor = Color(0xFF070A10)
+                                    ) {
+                                        Text("$tasksCount", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        ) {
+                            TaskListIcon(
+                                modifier = Modifier.size(20.dp),
+                                tint = Color(0xFFC3C6D7)
+                            )
                         }
+                    }
+
+                    // Button to quick-add task
+                    IconButton(
+                        onClick = onOpenCapture,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        AddPlusIcon(
+                            modifier = Modifier.size(20.dp),
+                            tint = CyanFixedDim
+                        )
                     }
                 }
             }
@@ -258,7 +289,7 @@ fun FocusSessionScreen(
                         modifier = Modifier
                             .size(96.dp)
                             .clip(RoundedCornerShape(26.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                            .background(Color(0xFF0A0E16))
                             .border(
                                 width = 1.dp,
                                 color = CyanFixedDim.copy(alpha = 0.35f),
@@ -268,7 +299,7 @@ fun FocusSessionScreen(
                     ) {
                         FocusTimerGraphic(
                             modifier = Modifier.size(44.dp),
-                            tint = MaterialTheme.colorScheme.secondary
+                            tint = Color(0xFFBDF4FF)
                         )
                     }
                 }
@@ -277,7 +308,7 @@ fun FocusSessionScreen(
                 val categoryName = task?.category ?: "Kerja"
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = Color(0xFF262A33),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
                     modifier = Modifier.padding(bottom = 12.dp)
                 ) {
@@ -298,13 +329,13 @@ fun FocusSessionScreen(
                             text = categoryName,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = Color(0xFFDFE2EE)
                         )
 
                         Text(
                             text = "•",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outlineVariant
+                            color = Color(0xFF434655)
                         )
 
                         Row(
@@ -313,13 +344,13 @@ fun FocusSessionScreen(
                         ) {
                             PriorityHighIcon(
                                 modifier = Modifier.size(12.dp),
-                                tint = MaterialTheme.colorScheme.error
+                                tint = Color(0xFFFFB4AB)
                             )
                             Text(
                                 text = "Mendesak",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.error
+                                color = Color(0xFFFFB4AB)
                             )
                         }
                     }
@@ -338,16 +369,22 @@ fun FocusSessionScreen(
                 )
 
                 // Task Title / Body
-                val taskTitle = task?.title?.ifBlank { null } ?: "Review draft kontrak klien baru"
+                val taskTitle = task?.title?.ifBlank { null }
+                    ?: "Review draft kontrak klien baru"
                 Text(
                     text = taskTitle,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = Color(0xFFC3C6D7),
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .padding(bottom = 20.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onOpenTaskList
+                        )
                 )
 
                 // Time / Schedule Pill Badge
@@ -368,7 +405,7 @@ fun FocusSessionScreen(
 
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.85f),
+                    color = Color(0xFF0A0E16).copy(alpha = 0.85f),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
                     modifier = Modifier.padding(bottom = 12.dp)
                 ) {
@@ -385,7 +422,7 @@ fun FocusSessionScreen(
                             text = timeRangeText,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = Color(0xFFDFE2EE)
                         )
                     }
                 }
@@ -393,7 +430,7 @@ fun FocusSessionScreen(
                 // Mode Status Pill Badge
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
+                    color = Color(0xFF0A0E16).copy(alpha = 0.5f),
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Row(
@@ -403,12 +440,12 @@ fun FocusSessionScreen(
                     ) {
                         LockIcon(
                             modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colorScheme.outline
+                            tint = Color(0xFF8D90A0)
                         )
                         Text(
                             text = "Mode fokus aktif • Notifikasi dibisukan",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            color = Color(0xFFC3C6D7).copy(alpha = 0.8f)
                         )
                     }
                 }
@@ -436,7 +473,7 @@ fun FocusSessionScreen(
                             .size(48.dp)
                             .scale(emergencyScale)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
+                            .background(Color(0xFF262A33).copy(alpha = 0.65f))
                             .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                             .clickable(
                                 interactionSource = emergencyInteraction,
@@ -448,7 +485,7 @@ fun FocusSessionScreen(
                     ) {
                         PhoneIcon(
                             modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = Color(0xFFC3C6D7)
                         )
                     }
 
@@ -500,7 +537,7 @@ fun FocusSessionScreen(
                             if (!isSessionActive) {
                                 PlayIcon(
                                     modifier = Modifier.size(22.dp),
-                                    tint = MaterialTheme.colorScheme.surfaceContainerLowest
+                                    tint = Color(0xFF0A0E16)
                                 )
                                 Text(
                                     text = "Mulai Sesi Fokus",
@@ -508,7 +545,7 @@ fun FocusSessionScreen(
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = (-0.2).sp,
-                                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                                    color = Color(0xFF0A0E16)
                                 )
                             } else {
                                 CheckIcon(
@@ -532,7 +569,7 @@ fun FocusSessionScreen(
                             .size(48.dp)
                             .scale(snoozeScale)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
+                            .background(Color(0xFF262A33).copy(alpha = 0.65f))
                             .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                             .clickable(
                                 interactionSource = snoozeInteraction,
@@ -550,7 +587,7 @@ fun FocusSessionScreen(
                                 text = "10m",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = Color(0xFFDFE2EE),
                                 lineHeight = 13.sp
                             )
                             Text(
@@ -558,21 +595,27 @@ fun FocusSessionScreen(
                                 style = MaterialTheme.typography.labelSmall,
                                 fontSize = 8.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.outlineVariant,
+                                color = Color(0xFF8D90A0),
                                 lineHeight = 9.sp
                             )
                         }
                     }
                 }
 
-                // Minimalist Android Gesture Line Indicator
+                // Minimalist Android Gesture Line Indicator (Tap to open Task List)
                 Box(
                     modifier = Modifier
                         .padding(top = 4.dp, bottom = 2.dp)
                         .width(128.dp)
-                        .height(4.dp)
+                        .height(6.dp)
                         .clip(RoundedCornerShape(percent = 50))
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                        .background(Color(0xFF434655).copy(alpha = 0.5f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onOpenTaskList
+                        )
+                        .semantics { contentDescription = "Buka Daftar Tugas" }
                 )
             }
         }
@@ -638,6 +681,39 @@ fun FocusTimerGraphic(
             strokeWidth = stroke,
             cap = StrokeCap.Round
         )
+    }
+}
+
+@Composable
+fun TaskListIcon(
+    modifier: Modifier = Modifier,
+    tint: Color
+) {
+    Canvas(modifier = modifier) {
+        val s = size.minDimension / 24f
+        val stroke = 1.8f.dp.toPx()
+        // Line 1
+        drawCircle(color = tint, radius = 1.5f * s, center = Offset(5f * s, 6.5f * s))
+        drawLine(color = tint, start = Offset(9f * s, 6.5f * s), end = Offset(20f * s, 6.5f * s), strokeWidth = stroke, cap = StrokeCap.Round)
+        // Line 2
+        drawCircle(color = tint, radius = 1.5f * s, center = Offset(5f * s, 12f * s))
+        drawLine(color = tint, start = Offset(9f * s, 12f * s), end = Offset(20f * s, 12f * s), strokeWidth = stroke, cap = StrokeCap.Round)
+        // Line 3
+        drawCircle(color = tint, radius = 1.5f * s, center = Offset(5f * s, 17.5f * s))
+        drawLine(color = tint, start = Offset(9f * s, 17.5f * s), end = Offset(16f * s, 17.5f * s), strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
+fun AddPlusIcon(
+    modifier: Modifier = Modifier,
+    tint: Color
+) {
+    Canvas(modifier = modifier) {
+        val s = size.minDimension / 24f
+        val stroke = 2.2f.dp.toPx()
+        drawLine(color = tint, start = Offset(12f * s, 4.5f * s), end = Offset(12f * s, 19.5f * s), strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color = tint, start = Offset(4.5f * s, 12f * s), end = Offset(19.5f * s, 12f * s), strokeWidth = stroke, cap = StrokeCap.Round)
     }
 }
 
