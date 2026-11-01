@@ -80,7 +80,6 @@ class MainActivity : ComponentActivity() {
                     onTaskSnoozed = { task, minutes ->
                         ReminderScheduler.snooze(applicationContext, task, minutes)
                     }
-                    }
                 ) as T
             }
         }
