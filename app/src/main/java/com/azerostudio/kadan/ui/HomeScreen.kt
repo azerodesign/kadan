@@ -288,7 +288,8 @@ fun HomeScreen(
                     ) {
                         StatCard(
                             number = unfinishedCount,
-                            label = "Belum selesai"
+                            label = "Belum selesai",
+                            isAlert = false
                         )
                     }
                 }
@@ -509,7 +510,7 @@ private fun HeroCard(
 private fun StatCard(
     number: Int,
     label: String,
-    isAlert: Boolean,
+    isAlert: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
