@@ -25,6 +25,11 @@ import androidx.compose.ui.graphics.Color
  * a reminder's due-time legibility and the ocean/charcoal brand matter
  * more than wallpaper matching.
  */
+// Brand Accent Colors for gradients and ambient effects
+val CyanFixedDim = Color(0xFF00DAF3)
+val KadanBlue = Color(0xFF2563EB)
+val KadanFocusDarkBackground = Color(0xFF070A10)
+
 val LightColorScheme = lightColorScheme(
     primary = Color(0xFF0369A1),
     onPrimary = Color(0xFFFFFFFF),

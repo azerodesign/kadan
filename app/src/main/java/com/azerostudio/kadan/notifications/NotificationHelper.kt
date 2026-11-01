@@ -27,6 +27,8 @@ import com.azerostudio.kadan.MainActivity
 object NotificationHelper {
     const val CHANNEL_ID = "kadan_reminders"
     const val EXTRA_OPEN_CAPTURE = "kadan_open_capture"
+    const val EXTRA_OPEN_FOCUS = "kadan_open_focus"
+    const val EXTRA_TASK_ID = "kadan_task_id"
 
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
@@ -56,6 +58,8 @@ object NotificationHelper {
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(EXTRA_OPEN_FOCUS, true)
+            putExtra(EXTRA_TASK_ID, taskId)
         }
         val pendingIntent = android.app.PendingIntent.getActivity(
             context,

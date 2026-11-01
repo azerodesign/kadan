@@ -155,6 +155,29 @@ object ReminderScheduler {
     }
 
     /**
+     * Snoozes the reminder for [task] by [minutes] minutes from now.
+     */
+    fun snooze(context: Context, task: Task, minutes: Int = 10): Boolean {
+        if (task.isDone) return false
+        val trigger = ZonedDateTime.now(ZONE).plusMinutes(minutes.toLong())
+        val exact = canScheduleExactAlarms(context)
+        if (exact) {
+            alarmManager(context).setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                trigger.toInstant().toEpochMilli(),
+                dueIntent(context, task)
+            )
+        } else {
+            alarmManager(context).setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                trigger.toInstant().toEpochMilli(),
+                dueIntent(context, task)
+            )
+        }
+        return exact
+    }
+
+    /**
      * Schedules the next weekday (Mon–Fri) 15:15 WIB PR capture nudge.
      * If today is a weekday and 15:15 has not passed, that is today;
      * otherwise it is the next weekday. Saturday/Sunday are skipped.

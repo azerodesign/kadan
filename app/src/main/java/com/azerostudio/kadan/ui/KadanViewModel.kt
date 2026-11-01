@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 class KadanViewModel(
     private val repository: TaskRepository,
     private val onTaskSaved: (Task) -> Unit = {},
-    private val onTaskRemoved: (Long) -> Unit = {}
+    private val onTaskRemoved: (Long) -> Unit = {},
+    private val onTaskSnoozed: (Task, Int) -> Unit = { _, _ -> }
 ) : ViewModel() {
 
     val tasks: StateFlow<List<Task>> = repository.observeAll()
@@ -45,6 +46,32 @@ class KadanViewModel(
 
     private val _pendingDeleted = MutableStateFlow<Task?>(null)
     val pendingDeleted: StateFlow<Task?> = _pendingDeleted.asStateFlow()
+
+    // Non-null = the task active in Focus Session Screen
+    private val _focusSessionTask = MutableStateFlow<Task?>(null)
+    val focusSessionTask: StateFlow<Task?> = _focusSessionTask.asStateFlow()
+
+    fun openFocusSession(taskId: Long) {
+        viewModelScope.launch {
+            val task = repository.getById(taskId) ?: tasks.value.firstOrNull { it.id == taskId }
+            if (task != null) {
+                _focusSessionTask.value = task
+            }
+        }
+    }
+
+    fun openFocusSessionForTask(task: Task) {
+        _focusSessionTask.value = task
+    }
+
+    fun closeFocusSession() {
+        _focusSessionTask.value = null
+    }
+
+    fun snoozeTask(task: Task, minutes: Int = 10) {
+        onTaskSnoozed(task, minutes)
+        closeFocusSession()
+    }
 
     fun selectCategory(label: String?) {
         _selectedCategory.value = label

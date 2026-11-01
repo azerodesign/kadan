@@ -76,6 +76,10 @@ class MainActivity : ComponentActivity() {
                     onTaskRemoved = { taskId ->
                         ReminderScheduler.cancelDue(applicationContext, taskId)
                         KadanWidgetProvider.requestUpdate(applicationContext)
+                    },
+                    onTaskSnoozed = { task, minutes ->
+                        ReminderScheduler.snooze(applicationContext, task, minutes)
+                    }
                     }
                 ) as T
             }
@@ -95,7 +99,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         exactAlarmGranted = ReminderScheduler.canScheduleExactAlarms(this)
-        handleCaptureIntent(intent)
+        handleIncomingIntent(intent)
 
         setContent {
             val themeMode by ThemePreferences.themeModeFlow(applicationContext)
@@ -126,7 +130,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleCaptureIntent(intent)
+        handleIncomingIntent(intent)
     }
 
     override fun onResume() {
@@ -137,10 +141,17 @@ class MainActivity : ComponentActivity() {
         KadanWidgetProvider.requestUpdate(this)
     }
 
-    private fun handleCaptureIntent(intent: Intent?) {
-        if (intent?.getBooleanExtra(NotificationHelper.EXTRA_OPEN_CAPTURE, false) == true) {
+    private fun handleIncomingIntent(intent: Intent?) {
+        if (intent == null) return
+        if (intent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_CAPTURE, false)) {
             val category = intent.getStringExtra("kadan_capture_category") ?: "PR"
             viewModel.openCapture(category)
+        }
+        if (intent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_FOCUS, false)) {
+            val taskId = intent.getLongExtra(NotificationHelper.EXTRA_TASK_ID, -1L)
+            if (taskId != -1L) {
+                viewModel.openFocusSession(taskId)
+            }
         }
     }
 }

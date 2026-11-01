@@ -1,5 +1,6 @@
 package com.azerostudio.kadan.ui
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,6 +24,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -40,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -94,6 +97,8 @@ fun HomeScreen(
     val captureRequest by viewModel.captureRequest.collectAsState()
     val editingTask by viewModel.editingTask.collectAsState()
     val pendingDeleted by viewModel.pendingDeleted.collectAsState()
+    val focusSessionTask by viewModel.focusSessionTask.collectAsState()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     val today = LocalDate.now(KadanViewModel.ZONE)
@@ -148,7 +153,36 @@ fun HomeScreen(
     LaunchedEffect(Unit) { entered = true }
 
     Scaffold(
-        topBar = { KadanTopBar(title = "Hari Ini") },
+        topBar = {
+            KadanTopBar(
+                title = "Hari Ini",
+                actions = {
+                    IconButton(
+                        onClick = {
+                            val candidate = tasks.firstOrNull { !it.isDone && (it.dueDate == todayEpoch || isOverdue(it)) }
+                                ?: tasks.firstOrNull { !it.isDone }
+                            if (candidate != null) {
+                                viewModel.openFocusSessionForTask(candidate)
+                            } else {
+                                viewModel.openFocusSessionForTask(
+                                    Task(
+                                        title = "Review draft kontrak klien baru",
+                                        category = "Kerja",
+                                        dueDate = todayEpoch,
+                                        dueTimeMinutes = 9 * 60
+                                    )
+                                )
+                            }
+                        }
+                    ) {
+                        FocusTimerGraphic(
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { viewModel.openCapture(Category.PR.label) },
@@ -323,7 +357,8 @@ fun HomeScreen(
                     task = task,
                     overdue = isOverdue(task),
                     onToggle = { viewModel.toggleDone(task) },
-                    onOpenEdit = { viewModel.openEdit(task) }
+                    onOpenEdit = { viewModel.openEdit(task) },
+                    onOpenFocus = { viewModel.openFocusSessionForTask(task) }
                 )
             }
 
@@ -358,6 +393,30 @@ fun HomeScreen(
             },
             onDelete = {
                 editingTask?.let { viewModel.delete(it) }
+            }
+        )
+    }
+
+    if (focusSessionTask != null) {
+        FocusSessionScreen(
+            task = focusSessionTask,
+            onDismiss = { viewModel.closeFocusSession() },
+            onSnooze = { minutes ->
+                focusSessionTask?.let { task ->
+                    viewModel.snoozeTask(task, minutes)
+                }
+            },
+            onCompleteTask = { task ->
+                viewModel.toggleDone(task)
+                viewModel.closeFocusSession()
+            },
+            onEmergencyCall = {
+                try {
+                    val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(dialIntent)
+                } catch (_: Exception) {}
             }
         )
     }
@@ -543,7 +602,8 @@ private fun TaskRow(
     task: Task,
     overdue: Boolean,
     onToggle: () -> Unit,
-    onOpenEdit: () -> Unit
+    onOpenEdit: () -> Unit,
+    onOpenFocus: () -> Unit
 ) {
     val dueDate = LocalDate.ofEpochDay(task.dueDate)
     val dateText = dueDate.format(
@@ -624,6 +684,17 @@ private fun TaskRow(
                         MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
+            }
+            if (!task.isDone) {
+                IconButton(
+                    onClick = onOpenFocus,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    FocusTimerGraphic(
+                        modifier = Modifier.size(20.dp),
+                        tint = if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
